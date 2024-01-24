@@ -11,6 +11,7 @@ Run this Java program to play blackjack against the computer!
 ## Features
 
 The game will explain how to play as you go.
+
 **Space** to hit
 **Enter** to stand
 

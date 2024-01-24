@@ -13,6 +13,7 @@ Run this Java program to play blackjack against the computer!
 The game will explain how to play as you go.
 
 **Space** to hit
+
 **Enter** to stand
 
 I made this game in high school. The original idea was to allow more than one player to play, however that feature was never quite finished. Thus, the code is written with a multiplayer perspective in mind.

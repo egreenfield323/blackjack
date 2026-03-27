@@ -5,75 +5,95 @@ import java.io.File;
 import java.io.IOException;
 import javax.imageio.ImageIO;
 
-public class Card {
+public class Card implements Comparable<Card> {
 
     public static final String[] RANKS = { null, "Ace", "2", "3", "4", "5", "6", "7", "8", "9", "10", "Jack", "Queen",
             "King" };
 
     public static final String[] SUITS = { "Clubs", "Diamonds", "Hearts", "Spades" };
 
+    private static final String IMAGE_DIR = "images/";
+
     private final int rank, suit;
-    private BufferedImage face;
-    private static BufferedImage back;
+    private final BufferedImage face;
+    private static final BufferedImage back;
 
     static {
-        String filename = "images/back02.png";
+        String filename = IMAGE_DIR + "back02.png";
+        BufferedImage tmp = null;
         try {
-            back = ImageIO.read(new File(filename));
+            tmp = ImageIO.read(new File(filename));
         } catch (IOException e) {
-            back = null;
             System.err.println(e + " file: " + filename);
         }
+        back = tmp;
     }
 
     public Card(int rank, int suit) {
-        if (rank > 13 || rank < 1) {
+        if (rank < 1 || rank > 13) {
             throw new IllegalArgumentException("rank " + rank + " is invalid");
-        } else if (suit > 3 || suit < 0) {
+        }
+        if (suit < 0 || suit > 3) {
             throw new IllegalArgumentException("suit " + suit + " is invalid");
         }
         this.rank = rank;
         this.suit = suit;
-        String filename = "images/card";
-        int cardNum = rank * 4 + suit;
-        cardNum -= 3;
-        filename += String.format("%02d.png", cardNum);
+        String filename = IMAGE_DIR + String.format("card%02d.png", rank * 4 + suit - 3);
+        BufferedImage tmp = null;
         try {
-            this.face = ImageIO.read(new File(filename));
+            tmp = ImageIO.read(new File(filename));
         } catch (IOException e) {
-            this.face = null;
             System.err.println(e + " file: " + filename);
         }
+        this.face = tmp;
     }
+
+    /** Returns the blackjack point value: Ace=11, face cards=10, others=face value. */
+    public int getValue() {
+        if (rank == 1) return 11;
+        if (rank > 10) return 10;
+        return rank;
+    }
+
+    public boolean isAce() { return rank == 1; }
+    public boolean isFaceCard() { return rank > 10; }
 
     public BufferedImage getFace() {
-        return this.face;
+        return face;
     }
 
-    public BufferedImage getBack() {
+    public static BufferedImage getBack() {
         return back;
     }
 
     public int getRank() {
-        return this.rank;
-
+        return rank;
     }
 
     public int getSuit() {
-        return this.suit;
+        return suit;
     }
 
-    public boolean equals(Card that) {
-        return this.compareTo(that) == 0;
-    }
-
+    @Override
     public int compareTo(Card that) {
-        int thisNum = this.rank * 4 + this.suit;
-        int thatNum = that.rank * 4 + that.suit;
-        return thisNum - thatNum;
+        int diff = this.rank - that.rank;
+        return diff != 0 ? diff : this.suit - that.suit;
     }
 
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) return true;
+        if (!(obj instanceof Card)) return false;
+        return compareTo((Card) obj) == 0;
+    }
+
+    @Override
+    public int hashCode() {
+        return rank * 4 + suit;
+    }
+
+    @Override
     public String toString() {
-        return RANKS[this.rank] + " of " + SUITS[this.suit];
+        return RANKS[rank] + " of " + SUITS[suit];
     }
 }

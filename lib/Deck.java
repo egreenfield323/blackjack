@@ -1,43 +1,65 @@
 package lib;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 public class Deck {
+
+    private final int numDecks;
     protected List<Card> deck;
 
+    /** Single-deck constructor. */
     public Deck() {
-        this.deck = new ArrayList<Card>();
-        for (int ranks = 1; ranks <= 13; ranks++) {
-            for (int suits = 0; suits < 4; suits++) {
-                deck.add(new Card(ranks, suits));
+        this(1);
+    }
+
+    /** Multi-deck constructor. Standard casino blackjack uses 6 decks. */
+    public Deck(int numDecks) {
+        if (numDecks < 1) throw new IllegalArgumentException("Must use at least 1 deck");
+        this.numDecks = numDecks;
+        this.deck = new ArrayList<>(52 * numDecks); // pre-sized
+        reset();
+    }
+
+    /** Rebuild all decks and shuffle. */
+    public void reset() {
+        deck.clear();
+        for (int d = 0; d < numDecks; d++) {
+            for (int rank = 1; rank <= 13; rank++) {
+                for (int suit = 0; suit < 4; suit++) {
+                    deck.add(new Card(rank, suit));
+                }
             }
         }
-    }
-
-    public Card deal() {
-        return this.deck.remove(0);
-    }
-
-    public int getCardsLeft() {
-        return this.deck.size();
+        shuffle();
     }
 
     public void shuffle() {
-        final int ITERATIONS = 1000;
-        for (int i = 0; i < ITERATIONS; i++) {
-            double indexRange = Math.random() * this.deck.size();
-            Card removed = this.deck.remove((int) indexRange);
-            this.deck.add(removed);
-        }
+        Collections.shuffle(deck);
     }
 
+    /** Deal from the top of the deck. Resets automatically if empty. */
+    public Card deal() {
+        if (deck.isEmpty()) reset();
+        return deck.remove(deck.size() - 1); // O(1) removal from end
+    }
+
+    public int getCardsLeft() { return deck.size(); }
+    public boolean isEmpty()  { return deck.isEmpty(); }
+
+    /**
+     * Returns true when fewer than 25% of cards remain — a good point to
+     * reset between hands (mimics the casino's cut card).
+     */
+    public boolean needsReshuffle() {
+        return deck.size() < (52 * numDecks) / 4;
+    }
+
+    @Override
     public String toString() {
-        String str = "";
-        for (Card card : deck) {
-            str += card + "\n";
-        }
-        return str;
+        StringBuilder sb = new StringBuilder();
+        for (Card card : deck) sb.append(card).append('\n');
+        return sb.toString();
     }
-
 }
